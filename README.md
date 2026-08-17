@@ -2,7 +2,7 @@
 <div align="center">
 
 <a href="https://github.com/leohux/media-agent">
-  <img src=".github/banner.svg" alt="media-agent" width="820">
+    <img src="docs/banner.svg" alt="media-agent" width="820">
 </a>
 
 **MEDIA-AGENT**
@@ -12,21 +12,23 @@
 <br>
 
 [![Release](https://img.shields.io/github/v/release/leohux/media-agent?color=brightgreen&label=Latest&style=for-the-badge)](https://github.com/leohux/media-agent/releases)
-[![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue?style=for-the-badge)](https://www.python.org/)
-[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-red?style=for-the-badge)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-%3E%3D3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-6E7681?style=for-the-badge)](#安装)
 [![MCP](https://img.shields.io/badge/MCP-stdio-5865F2?style=for-the-badge)](mcp.example.json)
+[![License](https://img.shields.io/badge/License-Unlicense-red?style=for-the-badge)](LICENSE)
+[![Commits](https://img.shields.io/github/commit-activity/m/leohux/media-agent?style=for-the-badge&label=commits)](https://github.com/leohux/media-agent/commits)
+[![Stars](https://img.shields.io/github/stars/leohux/media-agent?style=for-the-badge)](https://github.com/leohux/media-agent/stargazers)
+[![Last commit](https://img.shields.io/github/last-commit/leohux/media-agent?style=for-the-badge)](https://github.com/leohux/media-agent/commits)
 
 </div>
 <!-- MANPAGE: END EXCLUDED SECTION -->
 
 media-agent 让 AI 智能体真正去下载视频：你在 WorkBuddy / Cursor / Claude Desktop 里丢一条链接，Agent 会先解析标题和时长，再把文件存到你指定的目录。
 
-底层下载能力来自 [yt-dlp](https://github.com/yt-dlp/yt-dlp)（Unlicense）。**这不是官方 yt-dlp**，对外产品名是 media-agent。
-
 <div align="center">
-  <img src=".github/hero.png" alt="media-agent hero" width="760">
+  <img src="docs/hero.png" alt="media-agent" width="760">
   <br>
-  <img src=".github/architecture.svg" alt="Agent 调用 media-agent 的三个工具" width="820">
+  <img src="docs/architecture.png" alt="media-agent tools" width="820">
 </div>
 
 ## 目录
@@ -227,9 +229,9 @@ yt_dlp/agent/         三个工具 + MCP 服务
 yt_dlp/               下载内核
 test/test_agent_tools.py
 mcp.example.json
-.github/banner.svg
-.github/hero.png
-.github/architecture.svg
+docs/banner.svg
+docs/hero.png
+docs/architecture.png
 ```
 
 ```bash
