@@ -47,6 +47,7 @@ cookies
 *.ogg
 *.opus
 *.png
+!/.github/*.png
 *.sbv
 *.srt
 *.ssa
