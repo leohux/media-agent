@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "yt-dlp": {
+      "command": "python",
+      "args": ["-m", "yt_dlp.agent"],
+      "env": {
+        "YTDLP_AGENT_OUTPUT_DIR": "D:/downloads",
+        "YTDLP_AGENT_ALLOWED_ROOT": "D:/downloads"
+      }
+    }
+  }
+}

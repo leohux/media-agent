@@ -1,0 +1,7 @@
+yt-dlp-agent is a personal MCP/agent wrapper maintained by Leo Hu (https://github.com/leohux).
+
+The downloader core is yt-dlp:
+https://github.com/yt-dlp/yt-dlp
+
+yt-dlp is released under the Unlicense. This repository is not affiliated with
+the yt-dlp project or its maintainers.
