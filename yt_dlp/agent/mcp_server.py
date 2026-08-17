@@ -3,21 +3,31 @@
 from . import tools as agent_tools
 
 
-def _load_fastmcp():
+def _load_server_class():
     try:
         from mcp.server.fastmcp import FastMCP
+        return FastMCP
+    except ImportError:
+        pass
+    try:
+        from mcp.server.mcpserver import MCPServer
+        return MCPServer
+    except ImportError:
+        pass
+    try:
+        from mcp.server import MCPServer
+        return MCPServer
     except ImportError as e:
         raise SystemExit(
             'The MCP extra is required. Install with: pip install "media-agent[agent]" '
             'or: pip install mcp'
         ) from e
-    return FastMCP
 
 
 def create_server():
-    FastMCP = _load_fastmcp()
+    Server = _load_server_class()
     try:
-        mcp = FastMCP(
+        mcp = Server(
             'media-agent',
             instructions=(
                 'Download or inspect online videos. '
@@ -27,7 +37,7 @@ def create_server():
             ),
         )
     except TypeError:
-        mcp = FastMCP('media-agent')
+        mcp = Server('media-agent')
 
     @mcp.tool(name='extract_video_info')
     def extract_video_info(url: str, include_formats: bool = True) -> dict:

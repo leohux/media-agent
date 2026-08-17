@@ -59,9 +59,10 @@ class TestAgentValidation(unittest.TestCase):
         self.assertEqual(_validate_url(f'  {SAMPLE_URL}  '), SAMPLE_URL)
 
     def test_quality_aliases(self):
-        self.assertEqual(_format_selector('720p'), QUALITY_FORMATS['720p'])
-        self.assertEqual(_format_selector('BEST'), QUALITY_FORMATS['best'])
-        self.assertEqual(_format_selector('best', audio_only=True), QUALITY_FORMATS['audio_only'])
+        self.assertEqual(_format_selector('720p', merge=True), QUALITY_FORMATS['720p'])
+        self.assertEqual(_format_selector('BEST', merge=True), QUALITY_FORMATS['best'])
+        self.assertEqual(_format_selector('best', audio_only=True, merge=True), QUALITY_FORMATS['audio_only'])
+        self.assertEqual(_format_selector('360p', merge=False), 'b[height<=360]/b')
         with self.assertRaises(AgentToolError):
             _format_selector('4k')
 
@@ -139,6 +140,23 @@ class TestAgentCLI(unittest.TestCase):
             code = main(['extract', SAMPLE_URL, '--no-formats'])
         self.assertEqual(code, 0)
         self.assertIn('"ok": true', buf.getvalue())
+
+
+class TestMCPServer(unittest.TestCase):
+    def test_create_server_registers_tools(self):
+        try:
+            from yt_dlp.agent.mcp_server import create_server
+            server = create_server()
+        except SystemExit:
+            self.skipTest('mcp is not installed')
+
+        mgr = getattr(server, '_tool_manager', None)
+        self.assertIsNotNone(mgr)
+        tools = mgr.list_tools()
+        names = {getattr(t, 'name', None) for t in tools}
+        self.assertEqual(
+            names,
+            {'extract_video_info', 'list_formats', 'download_video'})
 
 
 if __name__ == '__main__':

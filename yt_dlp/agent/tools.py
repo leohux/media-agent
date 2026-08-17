@@ -1,4 +1,5 @@
 import os
+import shutil
 from urllib.parse import urlparse
 
 from ..YoutubeDL import YoutubeDL
@@ -11,6 +12,17 @@ QUALITY_FORMATS = {
     '720p': 'bv*[height<=720]+ba/b[height<=720]/b',
     '480p': 'bv*[height<=480]+ba/b[height<=480]/b',
     '360p': 'bv*[height<=360]+ba/b[height<=360]/b',
+    'audio': 'bestaudio/best',
+    'audio_only': 'bestaudio/best',
+}
+
+# Single-file selectors used when ffmpeg is not available to merge streams.
+QUALITY_FORMATS_SINGLE = {
+    'best': 'b',
+    '1080p': 'b[height<=1080]/b',
+    '720p': 'b[height<=720]/b',
+    '480p': 'b[height<=480]/b',
+    '360p': 'b[height<=360]/b',
     'audio': 'bestaudio/best',
     'audio_only': 'bestaudio/best',
 }
@@ -92,16 +104,23 @@ def _resolve_output_dir(output_dir=None, allowed_root=None):
     return path
 
 
-def _format_selector(quality, audio_only=False):
+def _ffmpeg_available():
+    return shutil.which('ffmpeg') is not None
+
+
+def _format_selector(quality, audio_only=False, merge=None):
+    if merge is None:
+        merge = _ffmpeg_available()
+    table = QUALITY_FORMATS if merge else QUALITY_FORMATS_SINGLE
     if audio_only:
-        return QUALITY_FORMATS['audio_only']
+        return table['audio_only']
     if not quality:
         quality = 'best'
     if not isinstance(quality, str):
         raise AgentToolError('quality must be a string')
     key = quality.strip().lower()
-    if key in QUALITY_FORMATS:
-        return QUALITY_FORMATS[key]
+    if key in table:
+        return table[key]
     raise AgentToolError(
         'quality must be one of: ' + ', '.join(QUALITY_FORMATS))
 
@@ -252,7 +271,8 @@ def download_video(
     """
     try:
         url = _validate_url(url)
-        fmt = _format_selector(quality, audio_only=audio_only)
+        has_ffmpeg = _ffmpeg_available()
+        fmt = _format_selector(quality, audio_only=audio_only, merge=has_ffmpeg)
         out_dir = _resolve_output_dir(output_dir, allowed_root=allowed_root)
     except AgentToolError as e:
         return _fail(e)
@@ -262,10 +282,10 @@ def download_video(
         'format': fmt,
         'outtmpl': '%(title)s [%(id)s].%(ext)s',
         'overwrites': False,
-        'max_downloads': 1,
         'paths': {'home': out_dir},
     })
-    if audio_only or fmt == QUALITY_FORMATS['audio_only']:
+    want_audio = audio_only or quality in ('audio', 'audio_only')
+    if want_audio and has_ffmpeg:
         params['postprocessors'] = [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
