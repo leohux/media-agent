@@ -37,6 +37,44 @@ class AgentToolError(ValueError):
     """Invalid agent-tool input (URL, quality, output path, ...)."""
 
 
+def _json_safe(value):
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, float):
+        if value != value or value in (float('inf'), float('-inf')):
+            return None
+        return value
+    if isinstance(value, (str, int, bool)) or value is None:
+        return value
+    return str(value)
+
+
+def _as_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        key = value.strip().lower()
+        if key in ('1', 'true', 'yes', 'on'):
+            return True
+        if key in ('0', 'false', 'no', 'off', ''):
+            return False
+    raise AgentToolError('boolean flag has an invalid value')
+
+
+def _normalize_quality(quality):
+    if quality is None or quality == '':
+        return 'best'
+    if not isinstance(quality, str):
+        raise AgentToolError('quality must be a string')
+    return quality.strip().lower()
+
+
 class _QuietLogger:
     def debug(self, msg):
         pass
@@ -60,13 +98,13 @@ class _QuietLogger:
 def _fail(error, **extra):
     result = {'ok': False, 'error': str(error)}
     result.update(extra)
-    return result
+    return _json_safe(result)
 
 
 def _ok(**fields):
     result = {'ok': True, 'error': None}
     result.update(fields)
-    return result
+    return _json_safe(result)
 
 
 def _validate_url(url):
@@ -114,11 +152,7 @@ def _format_selector(quality, audio_only=False, merge=None):
     table = QUALITY_FORMATS if merge else QUALITY_FORMATS_SINGLE
     if audio_only:
         return table['audio_only']
-    if not quality:
-        quality = 'best'
-    if not isinstance(quality, str):
-        raise AgentToolError('quality must be a string')
-    key = quality.strip().lower()
+    key = _normalize_quality(quality)
     if key in table:
         return table[key]
     raise AgentToolError(
@@ -235,6 +269,7 @@ def extract_video_info(url, include_formats=True):
     """
     try:
         url = _validate_url(url)
+        include_formats = _as_bool(include_formats, default=True)
     except AgentToolError as e:
         return _fail(e)
 
@@ -271,6 +306,8 @@ def download_video(
     """
     try:
         url = _validate_url(url)
+        audio_only = _as_bool(audio_only, default=False)
+        quality = _normalize_quality(quality)
         has_ffmpeg = _ffmpeg_available()
         fmt = _format_selector(quality, audio_only=audio_only, merge=has_ffmpeg)
         out_dir = _resolve_output_dir(output_dir, allowed_root=allowed_root)
@@ -298,14 +335,20 @@ def download_video(
 
     filepaths = [os.path.realpath(p) for p in _filepaths(info)]
     existing = [p for p in filepaths if os.path.isfile(p)]
-    filepath = existing[0] if existing else (filepaths[0] if filepaths else None)
-    filesize = os.path.getsize(filepath) if filepath and os.path.isfile(filepath) else None
-
+    filepath = existing[0] if existing else None
     summary = _summarize_info(info, include_formats=False)
+    if not filepath:
+        return _fail(
+            'Download finished but the output file was not found',
+            **summary,
+            output_dir=out_dir,
+        )
+    filesize = os.path.getsize(filepath)
+
     return _ok(
         **summary,
         filepath=filepath,
         filesize=filesize,
         output_dir=out_dir,
-        quality=quality if not audio_only else 'audio_only',
+        quality='audio_only' if audio_only else quality,
     )

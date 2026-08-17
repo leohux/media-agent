@@ -75,4 +75,8 @@ def create_server():
 
 
 def run_mcp():
-    create_server().run(transport='stdio')
+    server = create_server()
+    try:
+        server.run(transport='stdio')
+    except TypeError:
+        server.run()

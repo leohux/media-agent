@@ -17,12 +17,12 @@ import argparse
 import json
 import sys
 
+from ..utils import write_string
 from .tools import download_video, extract_video_info, list_formats
 
 
 def _print_json(data):
-    json.dump(data, sys.stdout, ensure_ascii=False, indent=2)
-    sys.stdout.write('\n')
+    write_string(json.dumps(data, ensure_ascii=False, indent=2) + '\n', out=sys.stdout)
     return 0 if data.get('ok') else 1
 
 

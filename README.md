@@ -4,9 +4,9 @@
 
 你对 WorkBuddy、Cursor、Claude Desktop、Qwen-Agent 说「把这个链接的视频下下来」，它们会调用本项目的 MCP 工具：先解析标题和时长，再下载到你指定的目录。
 
-当前版本：**0.1.1**  
+当前版本：**0.1.2**  
 仓库：https://github.com/leohux/media-agent  
-Release：https://github.com/leohux/media-agent/releases/tag/v0.1.1
+Release：https://github.com/leohux/media-agent/releases
 
 维护者：[Leo Hu](https://github.com/leohux)
 
@@ -119,10 +119,10 @@ Agent 只看到这 3 个工具，不会直接拼一长串下载参数。
 
 ### 方式一：Release 包（推荐）
 
-到 [Releases](https://github.com/leohux/media-agent/releases) 下载最新 wheel，例如 `0.1.1`：
+到 [Releases](https://github.com/leohux/media-agent/releases) 下载最新 wheel，例如 `0.1.2`：
 
 ```bash
-pip install media_agent-0.1.1-py3-none-any.whl
+pip install media_agent-0.1.2-py3-none-any.whl
 pip install mcp
 ```
 

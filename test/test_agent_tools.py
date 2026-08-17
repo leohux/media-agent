@@ -128,6 +128,27 @@ class TestAgentTools(unittest.TestCase):
         self.assertFalse(result['ok'])
         self.assertIn('quality', result['error'])
 
+    def test_download_rejects_string_false_audio_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_file = os.path.join(tmp, 'video [id].mp4')
+            with open(fake_file, 'wb') as f:
+                f.write(b'abc')
+            info = SAMPLE_INFO.copy()
+            info['requested_downloads'] = [{'filepath': fake_file}]
+            with patch('yt_dlp.agent.tools._run_ydl', return_value=info), \
+                    patch('yt_dlp.agent.tools._ffmpeg_available', return_value=False):
+                result = download_video(
+                    SAMPLE_URL, output_dir=tmp, quality='best', audio_only='false')
+        self.assertTrue(result['ok'])
+        self.assertEqual(result['quality'], 'best')
+
+    def test_download_missing_file_is_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch('yt_dlp.agent.tools._run_ydl', return_value=SAMPLE_INFO.copy()):
+                result = download_video(SAMPLE_URL, output_dir=tmp, quality='360p')
+        self.assertFalse(result['ok'])
+        self.assertIn('output file was not found', result['error'])
+
 
 class TestAgentCLI(unittest.TestCase):
     def test_cli_extract(self):
