@@ -69,10 +69,14 @@ def _validate_url(url):
 
 def _resolve_output_dir(output_dir=None, allowed_root=None):
     if not output_dir:
-        output_dir = os.environ.get('YTDLP_AGENT_OUTPUT_DIR') or os.path.join(
-            os.getcwd(), _DEFAULT_OUTPUT_DIRNAME)
+        output_dir = (
+            os.environ.get('MEDIA_AGENT_OUTPUT_DIR')
+            or os.environ.get('YTDLP_AGENT_OUTPUT_DIR')
+            or os.path.join(os.getcwd(), _DEFAULT_OUTPUT_DIRNAME))
     if not allowed_root:
-        allowed_root = os.environ.get('YTDLP_AGENT_ALLOWED_ROOT')
+        allowed_root = (
+            os.environ.get('MEDIA_AGENT_ALLOWED_ROOT')
+            or os.environ.get('YTDLP_AGENT_ALLOWED_ROOT'))
 
     path = os.path.realpath(os.path.abspath(os.path.expanduser(output_dir)))
     if allowed_root:

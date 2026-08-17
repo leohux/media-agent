@@ -1,4 +1,4 @@
-yt-dlp-agent is a personal MCP/agent wrapper maintained by Leo Hu (https://github.com/leohux).
+media-agent is a personal MCP/agent project maintained by Leo Hu (https://github.com/leohux).
 
 The downloader core is yt-dlp:
 https://github.com/yt-dlp/yt-dlp

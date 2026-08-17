@@ -1,4 +1,4 @@
-"""MCP stdio server exposing yt-dlp as agent tools."""
+"""MCP stdio server for media-agent."""
 
 from . import tools as agent_tools
 
@@ -8,7 +8,7 @@ def _load_fastmcp():
         from mcp.server.fastmcp import FastMCP
     except ImportError as e:
         raise SystemExit(
-            'The MCP extra is required. Install with: pip install "yt-dlp[agent]" '
+            'The MCP extra is required. Install with: pip install "media-agent[agent]" '
             'or: pip install mcp'
         ) from e
     return FastMCP
@@ -18,16 +18,16 @@ def create_server():
     FastMCP = _load_fastmcp()
     try:
         mcp = FastMCP(
-            'yt-dlp',
+            'media-agent',
             instructions=(
-                'Download or inspect online videos via yt-dlp. '
+                'Download or inspect online videos. '
                 'Always call extract_video_info first when the user has not confirmed '
                 'the title/duration. Never pass playlist URLs; use a single video URL. '
                 'Only http(s) URLs are accepted.'
             ),
         )
     except TypeError:
-        mcp = FastMCP('yt-dlp')
+        mcp = FastMCP('media-agent')
 
     @mcp.tool(name='extract_video_info')
     def extract_video_info(url: str, include_formats: bool = True) -> dict:

@@ -3,25 +3,22 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "yt-dlp-agent"
+name = "media-agent"
 authors = [
     {name = "Leo Hu"},
 ]
 maintainers = [
     {name = "Leo Hu"},
 ]
-description = "Personal MCP/agent wrapper around yt-dlp for WorkBuddy, Cursor, and other agents"
+description = "Personal MCP video-download agent for WorkBuddy, Cursor, and other hosts"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = [
     "cli",
     "downloader",
-    "youtube-dl",
-    "youtube-downloader",
-    "sponsorblock",
-    "yt-dlp",
     "mcp",
     "agent",
+    "video",
 ]
 license = "Unlicense"
 license-files = ["LICENSE"]
@@ -137,20 +134,19 @@ uv = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/leohux/yt-dlp-agent#readme"
-Repository = "https://github.com/leohux/yt-dlp-agent"
-Tracker = "https://github.com/leohux/yt-dlp-agent/issues"
-Upstream = "https://github.com/yt-dlp/yt-dlp"
+Documentation = "https://github.com/leohux/media-agent#readme"
+Repository = "https://github.com/leohux/media-agent"
+Tracker = "https://github.com/leohux/media-agent/issues"
 
 [project.scripts]
-yt-dlp = "yt_dlp:main"
-yt-dlp-agent = "yt_dlp.agent.__main__:main"
+media-agent = "media_agent.__main__:main"
 
 [project.entry-points.pyinstaller40]
 hook-dirs = "yt_dlp.__pyinstaller:get_hook_dirs"
 
 [tool.hatch.build.targets.sdist]
 include = [
+    "/media_agent",
     "/yt_dlp",
     "/devscripts",
     "/test",
@@ -172,7 +168,7 @@ artifacts = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["yt_dlp"]
+packages = ["media_agent", "yt_dlp"]
 artifacts = [
     "/yt_dlp/extractor/lazy_extractors.py",
 ]

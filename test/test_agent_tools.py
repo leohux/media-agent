@@ -132,7 +132,7 @@ class TestAgentCLI(unittest.TestCase):
     def test_cli_extract(self):
         from io import StringIO
 
-        from yt_dlp.agent.__main__ import main
+        from media_agent.__main__ import main
         buf = StringIO()
         with patch('yt_dlp.agent.tools._run_ydl', return_value=SAMPLE_INFO.copy()), \
                 patch('sys.stdout', buf):

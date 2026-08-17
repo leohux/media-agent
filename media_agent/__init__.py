@@ -1,6 +1,10 @@
-"""Agent-facing download helpers used by media-agent."""
+"""media-agent public entrypoint.
 
-from .tools import (
+The download engine still lives in ``yt_dlp``; this package is the
+product-facing CLI / MCP wrapper.
+"""
+
+from yt_dlp.agent import (
     AgentToolError,
     QUALITY_FORMATS,
     download_video,

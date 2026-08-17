@@ -6,10 +6,10 @@ RELEASE_GIT_HEAD = '997fa140840a08df3938b40da470c78049fef1f6'
 
 VARIANT = None
 
-UPDATE_HINT = 'This is leohux/yt-dlp-agent. Do not use -U; it would overwrite the agent layer. Sync yt-dlp from upstream manually.'
+UPDATE_HINT = 'This is leohux/media-agent. Do not auto-update from the upstream downloader; it would overwrite the agent layer.'
 
 CHANNEL = 'stable'
 
-ORIGIN = 'leohux/yt-dlp-agent'
+ORIGIN = 'leohux/media-agent'
 
 _pkg_version = '2026.07.04'

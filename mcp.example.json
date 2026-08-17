@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "yt-dlp": {
+    "media-agent": {
       "command": "python",
-      "args": ["-m", "yt_dlp.agent"],
+      "args": ["-m", "media_agent"],
       "env": {
-        "YTDLP_AGENT_OUTPUT_DIR": "D:/downloads",
-        "YTDLP_AGENT_ALLOWED_ROOT": "D:/downloads"
+        "MEDIA_AGENT_OUTPUT_DIR": "D:/downloads",
+        "MEDIA_AGENT_ALLOWED_ROOT": "D:/downloads"
       }
     }
   }

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Run the yt-dlp agent tools.
+"""Run media-agent tools.
 
-MCP (stdio, for Cursor / Claude / other agents)::
+MCP (stdio)::
 
-    python -m yt_dlp.agent
-    yt-dlp-agent
+    python -m media_agent
+    media-agent
 
-CLI (for debugging without an MCP host)::
+CLI::
 
-    python -m yt_dlp.agent extract https://example.com/watch?v=...
-    python -m yt_dlp.agent formats https://example.com/watch?v=...
-    python -m yt_dlp.agent download https://example.com/watch?v=... --output-dir ./downloads --quality 720p
+    python -m media_agent extract https://example.com/watch?v=...
+    python -m media_agent formats https://example.com/watch?v=...
+    python -m media_agent download https://example.com/watch?v=... --output-dir ./downloads --quality 720p
 """
 
 import argparse
@@ -28,8 +28,8 @@ def _print_json(data):
 
 def _build_parser():
     parser = argparse.ArgumentParser(
-        prog='yt-dlp-agent',
-        description='yt-dlp agent tools (MCP server or JSON CLI)')
+        prog='media-agent',
+        description='media-agent (MCP server or JSON CLI)')
     sub = parser.add_subparsers(dest='command')
 
     sub.add_parser('mcp', help='Run the MCP stdio server (default)')
@@ -75,7 +75,7 @@ def _cli(argv):
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
-    # Bare invocation is MCP stdio so Cursor mcp.json can use: python -m yt_dlp.agent
+    # Bare invocation is MCP stdio: python -m media_agent
     if not argv:
         from .mcp_server import run_mcp
         run_mcp()
