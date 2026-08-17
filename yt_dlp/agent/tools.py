@@ -1,9 +1,11 @@
 import os
+import re
 import shutil
 from urllib.parse import urlparse
 
 from ..YoutubeDL import YoutubeDL
-from ..utils import DownloadError, ExtractorError, int_or_none
+from ..cookies import SUPPORTED_BROWSERS
+from ..utils import DownloadError, ExtractorError, YoutubeDLError, int_or_none
 
 
 QUALITY_FORMATS = {
@@ -93,6 +95,55 @@ class _QuietLogger:
 
     def stderr(self, msg):
         pass
+
+
+def _parse_cookies_from_browser(spec):
+    if spec is None or spec is False:
+        return None
+    if isinstance(spec, (tuple, list)):
+        if not spec:
+            return None
+        return tuple(spec)
+    if not isinstance(spec, str) or not spec.strip():
+        return None
+    spec = spec.strip()
+    mobj = re.fullmatch(
+        r'''(?x)
+            (?P<name>[^+:]+)
+            (?:\s*\+\s*(?P<keyring>[^:]+))?
+            (?:\s*:\s*(?!:)(?P<profile>.+?))?
+            (?:\s*::\s*(?P<container>.+))?
+        ''', spec)
+    if mobj is None:
+        raise AgentToolError(f'invalid cookies_from_browser value: {spec}')
+    browser_name, keyring, profile, container = mobj.group(
+        'name', 'keyring', 'profile', 'container')
+    browser_name = browser_name.lower()
+    if browser_name not in SUPPORTED_BROWSERS:
+        raise AgentToolError(
+            f'unsupported browser {browser_name!r}. '
+            f'Supported: {", ".join(sorted(SUPPORTED_BROWSERS))}')
+    return (browser_name, profile, keyring, container)
+
+
+def _cookie_params(cookies_from_browser=None, cookiefile=None):
+    if cookies_from_browser is None:
+        cookies_from_browser = os.environ.get('MEDIA_AGENT_COOKIES_FROM_BROWSER')
+    if cookiefile is None:
+        cookiefile = os.environ.get('MEDIA_AGENT_COOKIEFILE')
+
+    extra = {}
+    parsed = _parse_cookies_from_browser(cookies_from_browser)
+    if parsed:
+        extra['cookiesfrombrowser'] = parsed
+    if cookiefile:
+        if not isinstance(cookiefile, str) or not cookiefile.strip():
+            raise AgentToolError('cookiefile must be a path')
+        path = os.path.abspath(os.path.expanduser(cookiefile.strip()))
+        if not os.path.isfile(path):
+            raise AgentToolError(f'cookie file not found: {path}')
+        extra['cookiefile'] = path
+    return extra
 
 
 def _fail(error, **extra):
@@ -240,8 +291,13 @@ def _run_ydl(params, url, *, download):
 def _extract_or_error(url, params, *, download):
     try:
         info = _run_ydl(params, url, download=download)
-    except (DownloadError, ExtractorError, OSError) as e:
-        return _fail(e)
+    except (DownloadError, ExtractorError, YoutubeDLError, OSError) as e:
+        msg = str(e)
+        if 'cookies' in msg.lower() and 'needed' in msg.lower():
+            msg += (
+                '. Pass cookies_from_browser="chrome" or "edge" after opening the site '
+                'in that browser (login not always required).')
+        return _fail(msg)
     except Exception as e:
         return _fail(e)
 
@@ -262,7 +318,8 @@ def _extract_or_error(url, params, *, download):
     return info
 
 
-def extract_video_info(url, include_formats=True):
+def extract_video_info(
+        url, include_formats=True, cookies_from_browser=None, cookiefile=None):
     """Parse a video URL without downloading the media file.
 
     Returns a JSON-serializable dict with title, duration, formats, etc.
@@ -270,20 +327,24 @@ def extract_video_info(url, include_formats=True):
     try:
         url = _validate_url(url)
         include_formats = _as_bool(include_formats, default=True)
+        extra = _cookie_params(cookies_from_browser, cookiefile)
     except AgentToolError as e:
         return _fail(e)
 
     params = _base_params()
     params['skip_download'] = True
+    params.update(extra)
     info = _extract_or_error(url, params, download=False)
     if isinstance(info, dict) and info.get('ok') is False:
         return info
     return _ok(**_summarize_info(info, include_formats=include_formats))
 
 
-def list_formats(url):
+def list_formats(url, cookies_from_browser=None, cookiefile=None):
     """List available media formats for a video URL without downloading."""
-    result = extract_video_info(url, include_formats=True)
+    result = extract_video_info(
+        url, include_formats=True,
+        cookies_from_browser=cookies_from_browser, cookiefile=cookiefile)
     if not result.get('ok'):
         return result
     return _ok(
@@ -298,7 +359,9 @@ def download_video(
         output_dir=None,
         quality='best',
         audio_only=False,
-        allowed_root=None):
+        allowed_root=None,
+        cookies_from_browser=None,
+        cookiefile=None):
     """Download a single video (or audio-only) to ``output_dir``.
 
     Playlists are rejected. The output path must stay inside ``allowed_root``
@@ -311,6 +374,7 @@ def download_video(
         has_ffmpeg = _ffmpeg_available()
         fmt = _format_selector(quality, audio_only=audio_only, merge=has_ffmpeg)
         out_dir = _resolve_output_dir(output_dir, allowed_root=allowed_root)
+        extra = _cookie_params(cookies_from_browser, cookiefile)
     except AgentToolError as e:
         return _fail(e)
 
@@ -321,6 +385,7 @@ def download_video(
         'overwrites': False,
         'paths': {'home': out_dir},
     })
+    params.update(extra)
     want_audio = audio_only or quality in ('audio', 'audio_only')
     if want_audio and has_ffmpeg:
         params['postprocessors'] = [{

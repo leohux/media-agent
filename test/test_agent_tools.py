@@ -14,6 +14,7 @@ from yt_dlp.agent.tools import (
     QUALITY_FORMATS,
     AgentToolError,
     _format_selector,
+    _parse_cookies_from_browser,
     _resolve_output_dir,
     _validate_url,
     download_video,
@@ -74,6 +75,39 @@ class TestAgentValidation(unittest.TestCase):
             self.assertTrue(resolved.startswith(os.path.realpath(allowed)))
             with self.assertRaises(AgentToolError):
                 _resolve_output_dir(os.path.join(root, 'outside'), allowed_root=allowed)
+
+
+class TestCookiesFromBrowser(unittest.TestCase):
+    def test_parse_chrome(self):
+        parsed = _parse_cookies_from_browser('chrome')
+        self.assertEqual(parsed[0], 'chrome')
+
+    def test_parse_profile(self):
+        parsed = _parse_cookies_from_browser('chrome:Profile 1')
+        self.assertEqual(parsed[0], 'chrome')
+        self.assertEqual(parsed[1], 'Profile 1')
+
+    def test_parse_rejects_unknown_browser(self):
+        with self.assertRaises(AgentToolError):
+            _parse_cookies_from_browser('netscape')
+
+    def test_extract_rejects_missing_cookiefile(self):
+        result = extract_video_info(
+            SAMPLE_URL, cookiefile='C:/definitely-missing-cookies.txt')
+        self.assertFalse(result['ok'])
+        self.assertIn('cookie file not found', result['error'])
+
+    def test_extract_passes_browser_cookies(self):
+        captured = {}
+
+        def fake_run(params, url, *, download):
+            captured['params'] = params
+            return SAMPLE_INFO.copy()
+
+        with patch('yt_dlp.agent.tools._run_ydl', side_effect=fake_run):
+            result = extract_video_info(SAMPLE_URL, cookies_from_browser='edge')
+        self.assertTrue(result['ok'])
+        self.assertEqual(captured['params']['cookiesfrombrowser'][0], 'edge')
 
 
 class TestAgentTools(unittest.TestCase):

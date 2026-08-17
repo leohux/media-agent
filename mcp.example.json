@@ -5,7 +5,8 @@
       "args": ["-m", "media_agent"],
       "env": {
         "MEDIA_AGENT_OUTPUT_DIR": "D:/downloads",
-        "MEDIA_AGENT_ALLOWED_ROOT": "D:/downloads"
+        "MEDIA_AGENT_ALLOWED_ROOT": "D:/downloads",
+        "MEDIA_AGENT_COOKIES_FROM_BROWSER": "chrome"
       }
     }
   }

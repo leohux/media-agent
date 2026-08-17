@@ -37,15 +37,22 @@ def _build_parser():
     p_extract = sub.add_parser('extract', help='Parse a video URL without downloading')
     p_extract.add_argument('url')
     p_extract.add_argument('--no-formats', action='store_true')
+    p_extract.add_argument('--cookies-from-browser', default=None,
+                           help='chrome, edge, firefox, ...')
+    p_extract.add_argument('--cookies', dest='cookiefile', default=None)
 
     p_formats = sub.add_parser('formats', help='List formats for a video URL')
     p_formats.add_argument('url')
+    p_formats.add_argument('--cookies-from-browser', default=None)
+    p_formats.add_argument('--cookies', dest='cookiefile', default=None)
 
     p_download = sub.add_parser('download', help='Download a single video')
     p_download.add_argument('url')
     p_download.add_argument('--output-dir', default=None)
     p_download.add_argument('--quality', default='best')
     p_download.add_argument('--audio-only', action='store_true')
+    p_download.add_argument('--cookies-from-browser', default=None)
+    p_download.add_argument('--cookies', dest='cookiefile', default=None)
     return parser
 
 
@@ -58,15 +65,22 @@ def _cli(argv):
         return 0
     if args.command == 'extract':
         return _print_json(extract_video_info(
-            args.url, include_formats=not args.no_formats))
+            args.url, include_formats=not args.no_formats,
+            cookies_from_browser=args.cookies_from_browser,
+            cookiefile=args.cookiefile))
     if args.command == 'formats':
-        return _print_json(list_formats(args.url))
+        return _print_json(list_formats(
+            args.url,
+            cookies_from_browser=args.cookies_from_browser,
+            cookiefile=args.cookiefile))
     if args.command == 'download':
         return _print_json(download_video(
             args.url,
             output_dir=args.output_dir,
             quality=args.quality,
             audio_only=args.audio_only,
+            cookies_from_browser=args.cookies_from_browser,
+            cookiefile=args.cookiefile,
         ))
     parser.print_help()
     return 2

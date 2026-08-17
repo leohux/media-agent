@@ -66,7 +66,7 @@ media-agent 让 AI 智能体真正去下载视频：你在 WorkBuddy / Cursor / 
 到 [Releases](https://github.com/leohux/media-agent/releases) 下载最新 wheel：
 
 ```bash
-pip install media_agent-0.1.2-py3-none-any.whl
+pip install media_agent-0.1.3-py3-none-any.whl
 pip install mcp
 ```
 
@@ -107,7 +107,8 @@ python -m media_agent extract "https://www.youtube.com/watch?v=jNQXAC9IVRw"
       "args": ["-m", "media_agent"],
       "env": {
         "MEDIA_AGENT_OUTPUT_DIR": "D:/downloads",
-        "MEDIA_AGENT_ALLOWED_ROOT": "D:/downloads"
+        "MEDIA_AGENT_ALLOWED_ROOT": "D:/downloads",
+        "MEDIA_AGENT_COOKIES_FROM_BROWSER": "chrome"
       }
     }
   }
@@ -142,6 +143,8 @@ Agent 只能调这三项，不会直接拼下载命令。
 | `list_formats` | 列出清晰度 | 用户指定了 720p / 只下音频 |
 | `download_video` | 下载**一条**视频 | 用户明确要保存文件 |
 
+三个工具都接受 `cookies_from_browser` / `cookiefile`。抖音等站点通常需要先在浏览器打开过该页。
+
 **`download_video` 参数**
 
 | 参数 | 说明 |
@@ -150,6 +153,8 @@ Agent 只能调这三项，不会直接拼下载命令。
 | `output_dir` | 保存目录，可省略 |
 | `quality` | `best` / `1080p` / `720p` / `480p` / `360p` / `audio_only` |
 | `audio_only` | `true` 时只下音频 |
+| `cookies_from_browser` | 从浏览器读 cookie，如 `chrome` / `edge` / `chrome:Profile 1` |
+| `cookiefile` | Netscape 格式 cookie 文件路径 |
 
 解析成功时大致返回：
 
@@ -176,6 +181,7 @@ python -m media_agent extract "https://www.bilibili.com/video/BVxxxx"
 python -m media_agent formats "https://www.youtube.com/watch?v=..."
 python -m media_agent download "https://www.youtube.com/watch?v=..." --output-dir D:/downloads --quality 720p
 python -m media_agent download "https://..." --output-dir D:/downloads --audio-only
+python -m media_agent extract --cookies-from-browser chrome "https://www.douyin.com/video/..."
 python -m media_agent   # 启动 MCP，给 Agent 用
 ```
 
@@ -203,6 +209,8 @@ python -m media_agent   # 启动 MCP，给 Agent 用
 |----------|------|
 | `MEDIA_AGENT_OUTPUT_DIR` | 默认保存目录 |
 | `MEDIA_AGENT_ALLOWED_ROOT` | 路径白名单根目录 |
+| `MEDIA_AGENT_COOKIES_FROM_BROWSER` | 默认从哪个浏览器读 cookie（`chrome` / `edge` / `firefox` …） |
+| `MEDIA_AGENT_COOKIEFILE` | Netscape cookie 文件路径 |
 
 ## 常见问题
 
@@ -210,7 +218,10 @@ python -m media_agent   # 启动 MCP，给 Agent 用
 确认 `command` 能执行 `python -m media_agent --help`，并且已安装 `mcp`。
 
 **解析成功，YouTube 下载 403？**  
-站点风控常见。可换其他平台或直链；当前 Agent 接口尚未暴露 cookie。
+站点风控常见。可换其他平台或直链，或加上 `--cookies-from-browser chrome`（需已在该浏览器登录）。
+
+**抖音提示 Fresh cookies are needed？**  
+先在 Chrome / Edge 打开过该视频页，再传 `--cookies-from-browser chrome` 或 `edge`。浏览器开着时 Windows 上有时读不到 cookie，可先关掉浏览器再试。也可导出 Netscape cookie 文件后用 `--cookies 路径`。
 
 **提示要 ffmpeg？**  
 没装也会下（单文件格式）。要高清画质+音轨合并，请安装 ffmpeg。
